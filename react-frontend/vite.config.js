@@ -13,4 +13,13 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: 4173,
+    host: '0.0.0.0',
+    allowedHosts: [
+      'pere-laravel-blog-application-5.onrender.com',
+      'localhost',
+      '127.0.0.1',
+    ],
+  },
 })
