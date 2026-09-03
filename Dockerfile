@@ -31,21 +31,23 @@ RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions sto
 # Install PHP dependencies
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
-# Generate app key
-RUN php artisan key:generate --force
+# Create .env file from .env.example (will be overridden by Render env vars)
+RUN cp .env.example .env
 
-# Run migrations
-RUN php artisan migrate --force || true
+# Generate initial app key (will be overridden by APP_KEY env var)
+RUN php artisan key:generate --force || true
 
-# Cache configuration for production
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Cache configuration
+RUN php artisan config:cache || true
 
-# Set Apache document root
+# Configure Apache to use Laravel's public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
@@ -54,5 +56,5 @@ RUN chmod -R 755 /var/www/html
 # Expose port
 EXPOSE 80
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Run entrypoint script
+ENTRYPOINT ["docker-entrypoint.sh"]
