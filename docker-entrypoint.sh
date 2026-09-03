@@ -37,6 +37,14 @@ else
     echo "⚠️ Migrations had warnings, continuing..."
 fi
 
+# Seed demo data (users, roles, categories)
+echo "Seeding demo data..."
+if php artisan db:seed --force 2>&1 | tee /tmp/seed.log; then
+    echo "✅ Database seeded successfully"
+else
+    echo "⚠️ Seeding had issues, continuing..."
+fi
+
 # Verify critical tables exist
 echo "Verifying database tables..."
 php artisan tinker --execute="echo 'Database connection verified';" || true
