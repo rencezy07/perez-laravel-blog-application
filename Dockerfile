@@ -34,11 +34,8 @@ RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoload
 # Create .env file from .env.example (will be overridden by Render env vars)
 RUN cp .env.example .env
 
-# Generate initial app key (will be overridden by APP_KEY env var)
-RUN php artisan key:generate --force || true
-
-# Cache configuration
-RUN php artisan config:cache || true
+# Note: APP_KEY generation and migrations will run at container startup
+# via docker-entrypoint.sh when database is available
 
 # Configure Apache to use Laravel's public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public

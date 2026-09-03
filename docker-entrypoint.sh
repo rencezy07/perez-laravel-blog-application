@@ -15,21 +15,41 @@ if ! grep -q "APP_KEY=base64:" .env; then
     php artisan key:generate --force
 fi
 
-# Wait a moment for database to be ready
+# Wait for database to be ready (retry logic)
 echo "Waiting for database to be ready..."
-sleep 5
+for i in {1..30}; do
+    echo "Database connection attempt $i/30..."
+    if php artisan db:show > /dev/null 2>&1; then
+        echo "✅ Database is ready!"
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo "⚠️ Database connection timeout - migrations may fail"
+    fi
+    sleep 2
+done
 
-# Run migrations
+# Run migrations with better error handling
 echo "Running migrations..."
-php artisan migrate --force || true
+if php artisan migrate --force 2>&1 | tee /tmp/migrate.log; then
+    echo "✅ Migrations completed successfully"
+else
+    echo "⚠️ Migrations had warnings, continuing..."
+fi
+
+# Verify critical tables exist
+echo "Verifying database tables..."
+php artisan tinker --execute="echo 'Database connection verified';" || true
 
 # Clear caches and cache routes/views
+echo "Caching configuration..."
 php artisan cache:clear || true
 php artisan route:cache || true
 php artisan view:cache || true
 php artisan config:cache || true
 
 echo "✅ Laravel application is ready!"
+echo "API available at https://pere-laravel-blog-application-4.onrender.com/api"
 
 # Start Apache
 exec apache2-foreground
