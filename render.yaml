@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: laravel-backend
+    env: php
+    buildCommand: bash laravel-backend/render-build.sh
+    startCommand: cd laravel-backend && php -S 0.0.0.0:$PORT public/index.php
+    root: laravel-backend
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: stack
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: CACHE_STORE
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: DB_HOST
+        fromDatabase:
+          name: laravel-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: laravel-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: laravel-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: laravel-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: laravel-db
+          property: password
+
+  - type: web
+    name: react-frontend
+    env: node
+    buildCommand: bash react-frontend/render-build.sh
+    startCommand: cd react-frontend && npm run preview -- --host 0.0.0.0
+    root: react-frontend
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://laravel-backend.onrender.com/api
+
+databases:
+  - name: laravel-db
+    engine: postgresql
+    version: "14"
+    plan: free
