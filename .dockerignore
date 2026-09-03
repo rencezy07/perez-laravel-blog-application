@@ -1,0 +1,16 @@
+.git
+.gitignore
+node_modules
+npm-debug.log
+laravel-backend/vendor
+laravel-backend/node_modules
+laravel-backend/.env
+laravel-backend/.env.local
+laravel-backend/.env.*.local
+laravel-backend/storage/logs
+react-frontend/node_modules
+react-frontend/dist
+.env.local
+.vscode
+.idea
+*.log
