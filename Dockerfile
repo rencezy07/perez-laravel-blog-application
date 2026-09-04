@@ -4,6 +4,7 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    libicu-dev \
     libpq-dev \
     libzip-dev \
     zip \
@@ -11,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
     pdo \
     pdo_pgsql \
+    intl \
     zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*

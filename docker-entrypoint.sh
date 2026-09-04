@@ -17,6 +17,11 @@ fi
 
 # Wait for database to be ready (retry logic)
 echo "Waiting for database to be ready..."
+echo "Database driver: ${DB_CONNECTION:-not set}"
+echo "Database host: ${DB_HOST:-not set}"
+echo "Database port: ${DB_PORT:-not set}"
+echo "Database name: ${DB_DATABASE:-not set}"
+echo "Database user: ${DB_USERNAME:-not set}"
 for i in {1..30}; do
     echo "Database connection attempt $i/30..."
     if php artisan db:show > /dev/null 2>&1; then
@@ -24,7 +29,8 @@ for i in {1..30}; do
         break
     fi
     if [ $i -eq 30 ]; then
-        echo "❌ Database connection timeout"
+        echo "❌ Database connection timeout. Last database error:"
+        php artisan db:show || true
         exit 1
     fi
     sleep 2
