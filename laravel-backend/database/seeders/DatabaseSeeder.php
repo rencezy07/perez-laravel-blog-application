@@ -41,13 +41,25 @@ class DatabaseSeeder extends Seeder
             ], ['name' => $name]);
         }
 
-        $categoryIds = Category::pluck('id')->all();
+        $categoriesBySlug = Category::pluck('id', 'slug');
+        $demoPosts = [
+            ['title' => 'Welcome to the Blog', 'slug' => 'welcome-to-the-blog', 'category' => 'technology', 'user_id' => $admin->id],
+            ['title' => 'Simple Ideas for Everyday Life', 'slug' => 'simple-ideas-for-everyday-life', 'category' => 'lifestyle', 'user_id' => $user->id],
+            ['title' => 'Planning Your Next Adventure', 'slug' => 'planning-your-next-adventure', 'category' => 'travel', 'user_id' => $user->id],
+            ['title' => 'Design Principles That Matter', 'slug' => 'design-principles-that-matter', 'category' => 'design', 'user_id' => $admin->id],
+            ['title' => 'Building Better Projects', 'slug' => 'building-better-projects', 'category' => 'technology', 'user_id' => $user->id],
+        ];
 
-        foreach (range(1, 5) as $index) {
-            Post::factory()->create([
-                'user_id' => $index % 2 === 0 ? $admin->id : $user->id,
-                'category_id' => $categoryIds[array_rand($categoryIds)],
-            ]);
+        foreach ($demoPosts as $demoPost) {
+            Post::updateOrCreate(
+                ['slug' => $demoPost['slug']],
+                [
+                    'title' => $demoPost['title'],
+                    'content' => 'This is a demo post for the blog application.',
+                    'category_id' => $categoriesBySlug[$demoPost['category']],
+                    'user_id' => $demoPost['user_id'],
+                ]
+            );
         }
     }
 }
