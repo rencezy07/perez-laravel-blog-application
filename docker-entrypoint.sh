@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "Starting Laravel application..."
 
@@ -9,8 +9,8 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 
-# Generate app key if not already set
-if ! grep -q "APP_KEY=base64:" .env; then
+# Generate an app key only when neither Render nor .env provides one
+if [ -z "${APP_KEY:-}" ] && ! grep -qE '^APP_KEY=base64:.+' .env; then
     echo "Generating APP_KEY..."
     php artisan key:generate --force
 fi
@@ -24,26 +24,21 @@ for i in {1..30}; do
         break
     fi
     if [ $i -eq 30 ]; then
-        echo "⚠️ Database connection timeout - migrations may fail"
+        echo "❌ Database connection timeout"
+        exit 1
     fi
     sleep 2
 done
 
 # Run migrations with better error handling
 echo "Running migrations..."
-if php artisan migrate --force 2>&1 | tee /tmp/migrate.log; then
-    echo "✅ Migrations completed successfully"
-else
-    echo "⚠️ Migrations had warnings, continuing..."
-fi
+php artisan migrate --force
+echo "✅ Migrations completed successfully"
 
 # Seed demo data (users, roles, categories)
 echo "Seeding demo data..."
-if php artisan db:seed --force 2>&1 | tee /tmp/seed.log; then
-    echo "✅ Database seeded successfully"
-else
-    echo "⚠️ Seeding had issues, continuing..."
-fi
+php artisan db:seed --force
+echo "✅ Database seeded successfully"
 
 # Verify critical tables exist
 echo "Verifying database tables..."

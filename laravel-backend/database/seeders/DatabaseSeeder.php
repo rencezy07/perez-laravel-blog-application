@@ -15,11 +15,11 @@ class DatabaseSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $userRole = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
+        $admin = User::updateOrCreate(
+            ['email' => env('ADMIN_EMAIL', 'admin@example.com')],
             [
                 'name' => 'Admin User',
-                'password' => bcrypt('Admin123!'),
+                'password' => env('ADMIN_PASSWORD', 'Admin123!'),
             ]
         );
         $admin->syncRoles([$adminRole]);
